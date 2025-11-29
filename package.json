@@ -1,0 +1,41 @@
+{
+  "name": "al-khalifa-backend",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/sherifshoukryalqwatly/Al-Khalifa-Backend#readme",
+  "bugs": {
+    "url": "https://github.com/sherifshoukryalqwatly/Al-Khalifa-Backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sherifshoukryalqwatly/Al-Khalifa-Backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev":"nodemon ."
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.0.0",
+    "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
