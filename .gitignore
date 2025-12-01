@@ -16,3 +16,7 @@ Thumbs.db
 
 # IDE
 .vscode/
+
+# RSA Keys
+privateKey.pem
+publicKey.pem
