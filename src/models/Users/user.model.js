@@ -50,11 +50,17 @@ const userData = {
     enum: ["local", "google", "facebook", "twitter"],
     default: ["local"],
   },
-  name: createLocalizedStringSchema(2,50,true),
+  name: {
+    type: String,
+    trim: true,
+    required: [true, 'Name is Required / الاسم مطلوب'],
+    minlength: [2, `Text must be at least two characters long / الاسم يجب على الاقل حرفين `],
+    maxlength: [100, `Text must not exceed 100 characters / الاسم يجب على الاكثر 100 حرف `],
+  },
   email: {
     type:String,
     required:[true,"Email is Required / البريد الالكترونى مطلوب"],
-    uniqe: [true,"Email must be unique / يجب أن يكون البريد الإلكتروني فريدًا"],
+    unique: [true,"Already Registered / مسجل بالفعل"],
     lowercase: true,
     validate: {
       validator: function (value) {
@@ -108,15 +114,7 @@ const userData = {
       "Phone number is required / رقم الهاتف مطلوب",
     ],
     unique: [true, "Phone number must be unique / يجب أن يكون رقم الهاتف فريدًا"],
-    sparse: true,
-    validate: {
-      validator: function (value) {
-        if (!value) return true; // skip validation for social logins
-        return globalRegex.phoneRegex.test(value);
-      },
-      message: (props) =>
-        `"${props.value}" is not a valid phone number / "${props.value}" ليس رقم هاتف صالح`,
-    },
+    sparse: true
   },
   role: {
     type: String,
@@ -146,36 +144,49 @@ const userData = {
     default: false,
   },
 }
-const userSchema = new mongoose.Schema(userData,{
-  timestamps:true,
-  toJSON: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      ret.id = ret._id;
-      ret.phonenumber = decryptRSA(ret.phonenumber);
-      delete ret._id;
-      delete ret.__v;
-      delete ret.password;
-      delete ret.googleid;
-      delete ret.faceBookid;
-      delete ret.twitterid;
-      return ret;
+function safeDecryptRSA(value) {
+  if (!value) return null; // skip undefined
+  if (!/^[A-Za-z0-9+/=]+$/.test(value)) return value; // only Base64
+  try { 
+      return decryptRSA(value); 
+  } catch (err) { 
+      console.warn("Failed to decrypt phonenumber:", err.message); 
+      return value; 
+  }
+}
+
+const userSchema = new mongoose.Schema(userData, {
+    timestamps: true,
+    toJSON: {
+        virtuals: true,
+        transform: (doc, ret) => {
+            ret.id = ret._id;
+            ret.phonenumber = safeDecryptRSA(ret.phonenumber);
+
+            delete ret._id;
+            delete ret.__v;
+            delete ret.password;
+            delete ret.googleid;
+            delete ret.faceBookid;
+            delete ret.twitterid;
+
+            return ret;
+        },
     },
-  },
 });
 
+
 // 🔒 Hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password") || !this.password) return next();
+userSchema.pre("save",async function () {
+  if (!this.isModified("password") || !this.password) return ;
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     console.log("Password hashed:", this.password);
     if (this.phonenumber)
       this.phonenumber = encryptRSA(this.phonenumber);
-    next();
   } catch (err) {
-    next(err);
+    throw err;
   }
 });
 

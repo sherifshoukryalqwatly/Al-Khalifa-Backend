@@ -1,7 +1,7 @@
 import express from "express";
 
-import { authJWT } from "../middlewares/passport.middleware.js";
-import { upload } from "../middlewares/multer.middleware.js";
+import { authJWT } from "../../middlewares/passport.middleware.js";
+import { upload } from "../../middlewares/multer.middleware.js";
 
 
 const router = express.Router();
