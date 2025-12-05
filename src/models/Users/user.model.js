@@ -119,10 +119,10 @@ const userData = {
   role: {
     type: String,
     enum: {
-      values: ["user", "admin"],
+      values: ["SUPER_ADMIN","USER", "ADMIN"],
       message: "{VALUE} is not supported / {VALUE} غير مدعوم",
     },
-    default: "user",
+    default: "USER",
   },
 
   isDeleted: {

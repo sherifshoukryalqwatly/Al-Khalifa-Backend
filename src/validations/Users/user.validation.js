@@ -37,13 +37,26 @@ export const baseValidationRules = {
     .required(),
 
   role: Joi.string()
-    .valid("user", "admin")
-    .default('user')
+    .valid("USRE", "ADMIN","SUPER_ADMIN")
+    .default('USER')
     .messages({
-      'any.only': 'Role must be either admin or user / يجب أن يكون الدور إما admin أو user',
+      'any.only': 'Role must be either admin or user / يجب أن يكون الدور إما ADMIN أو USER',
     }),
 
   password: Joi.string()
+    .min(6)
+    .max(100)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+    .required()
+    .messages({
+      'string.empty': 'Admin Password is required / كلمة المرور مطلوبة',
+      'string.min': 'Password must be at least 6 characters',
+      'string.max': 'Password is too long',
+      'string.pattern.base':
+        'Password must contain uppercase, lowercase, number, and special character',
+      'any.required': 'Admin Password is required',
+    }),
+  confirmPassword: Joi.string()
     .min(6)
     .max(100)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
@@ -107,8 +120,9 @@ export const createUserSchema = Joi.object({
   name: baseValidationRules.name.required(),
   email: baseValidationRules.email.required(),
   password: baseValidationRules.password.required(),
+  confirmPassword: baseValidationRules.confirmPassword.required(),
   phonenumber: baseValidationRules.phonenumber.required(),
-  role: baseValidationRules.role.default('user'),
+  role: baseValidationRules.role.default('USER'),
   isVerify: baseValidationRules.isVerify.default(false),
   faceBookid: baseValidationRules.faceBookid,
   googleId: baseValidationRules.googleId,
