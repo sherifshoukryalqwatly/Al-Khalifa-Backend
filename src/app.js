@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
+import passport from 'passport';
 
 import routes from './routes/index.js';
 import { requestLogger } from "./middlewares/logger.middleware.js";
 import { swaggerSetup } from "./config/swagger.config.js";
 import AppErrors from './utils/AppErrors.js';
-
+import "./config/google_passport.config.js";       
 const app = express();
 
 // Security Middlewares
@@ -21,8 +22,7 @@ app.use(requestLogger);
 
 
 // Passport
-// passportConfig(passport);
-// app.use(passport.initialize());
+app.use(passport.initialize());
 
 // Routes
 app.use("/api", routes);

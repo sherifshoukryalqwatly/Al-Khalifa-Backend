@@ -69,31 +69,32 @@ const userData = {
     type: String,
     required: [
       function () {
-        return (
-          !this.googleid &&
-          !this.faceBookid 
-        );
+        return !this.googleid && !this.faceBookid;
       },
       "Password is required / الرقم السري مطلوب",
     ],
-    minLength: [
-      6,
-      "Password must be at least 6 characters / كلمة المرور يجب أن تكون 6 أحرف على الأقل",
-    ],
-    maxLength: [
-      100,
-      "Password must be at most 100 characters / كلمة المرور يجب أن تكون 100 حرف كحد أقصى",
-    ],
-    validate: {
-      validator: function (value) {
-        if (!value) return true; // skip validation for social logins
-        return globalRegex.passwordRegex.test(
-          value
-        );
+    validate: [
+      {
+        validator: function (value) {
+          // Skip validation for social logins
+          if (this.googleid || this.faceBookid) return true;
+
+          if (!value) return false; // required for local users
+          return value.length >= 6 && value.length <= 100;
+        },
+        message: "Password must be between 6 and 100 characters / كلمة المرور يجب أن تكون بين 6 و 100 حرف",
       },
-      message: (props) =>
-        ` ${props.value} Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character / ${props.value} يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل وحرف صغير واحد ورقم واحد وحرف خاص واحد`,
-    },
+      {
+        validator: function (value) {
+          // Skip validation for social logins
+          if (this.googleid || this.faceBookid) return true;
+
+          if (!value) return false;
+          return globalRegex.passwordRegex.test(value);
+        },
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character / كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل وحرف صغير واحد ورقم واحد وحرف خاص واحد",
+      },
+    ],
   },
   phonenumber: {
     type: String,
