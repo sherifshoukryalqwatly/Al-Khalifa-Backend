@@ -137,6 +137,16 @@ const userData = {
     type: Boolean,
     default: false,
   },
+  otp:{
+    type:Number,
+    default:null
+  },
+  otpExpiry:{
+    type:Date,
+    default:null
+  },
+  resetPasswordToken: String,
+  resetPasswordExpiry: Date,
 }
 function safeDecryptRSA(value) {
   if (!value) return null; // skip undefined

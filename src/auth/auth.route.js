@@ -1,6 +1,16 @@
 import express from "express";
 import passport from "passport";
-import { googleCallback, signIn, signOut, signUp, adminSignUp, facebookCallback } from "../auth/auth.controller.js";
+import { 
+  googleCallback,
+  signIn,
+  signOut,
+  signUp,
+  facebookCallback,
+  verifyOtp,
+  resendOtp,
+  requestResetPassword,
+  resetPassword
+  } from "../auth/auth.controller.js";
 import validationMiddleware, { createUserSchema } from "../validations/Users/user.validation.js";
 
 const router = express.Router();
@@ -9,6 +19,10 @@ const router = express.Router();
 router.post("/login", signIn);
 router.post("/register", validationMiddleware(createUserSchema), signUp);
 router.post("/logout", signOut);
+router.post("/verify-otp", verifyOtp);
+router.post("/resend-otp", resendOtp);
+router.post("/request-reset-password", requestResetPassword);
+router.post("/reset-password", resetPassword);
 
 // Google OAuth routes
 router.get(

@@ -1,19 +1,23 @@
 import express from "express";
 import * as userController from '../../controllers/Users/user.controller.js';
 import validationMiddleware,{ createUserSchema , updateUserSchema } from '../../validations/Users/user.validation.js'
+import { authorizeRole, isAuthenticated } from "../../middlewares/auth.middleware.js";
 const router = express.Router();
 
-router.get('/by_email/:email', userController.findByEmail);
+router.use(isAuthenticated);
+
+router.route('/by_email/:email')
+    .get(authorizeRole('SUPER_ADMIN','ADMIN'), userController.findByEmail)
 
 router.route('/:id')
     .patch(validationMiddleware(updateUserSchema), userController.update)
     .delete(userController.remove)
-    .get(userController.findById);
+    .get(authorizeRole('SUPER_ADMIN','ADMIN'),userController.findById);
 
 router.route('/')
-    .get(userController.findAll)
-    .post(validationMiddleware(createUserSchema), userController.create)
-    .delete(userController.removeAll);
+    .get(authorizeRole('SUPER_ADMIN','ADMIN'),userController.findAll)
+    .post(authorizeRole('SUPER_ADMIN','ADMIN'),validationMiddleware(createUserSchema), userController.create)
+    .delete(authorizeRole('SUPER_ADMIN','ADMIN'),userController.removeAll);
 
 
 export default router;

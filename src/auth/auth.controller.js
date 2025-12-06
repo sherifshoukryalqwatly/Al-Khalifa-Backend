@@ -5,6 +5,9 @@ import {generateToken} from '../utils/jwt.js';
 import { StatusCodes } from '../utils/constants.js';
 import { appResponses } from '../utils/AppResponses.js';
 import * as userRepo from '../repo/Users/user.repo.js';
+import { mailVerification , mailVerification2, sendResetPasswordEmail } from '../utils/email.js';
+import { generateOTP } from '../utils/generateOTP.js';
+import crypto from 'crypto'
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -71,42 +74,135 @@ export const signUp =asyncWrapper(async (req,res,next)=>{
         throw AppErrors.badRequest('Password is not Math / الرقم السرى غير متطابق');
         
     }
+    // 1️⃣ Generate OTP
+    const otp = generateOTP(); // ex: 6-digit code
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // valid for 10 minutes
 
-    const newUser = await userRepo.create(req.body);
+    // 2️⃣ Create user with isVerify=false
+    const newUser = await userRepo.create({
+        ...req.body,
+        otp,
+        otpExpiry,
+    });
 
-    return appResponses.success(res,newUser,'User Registerd Successfully / تم تسجيل المستخدم بنجاح',StatusCodes.CREATED)
+    await mailVerification(email,otp)
+    // await mailVerification2(email,otp)
+    
+
+    return appResponses.success(res,newUser,"User Registered Successfully. OTP sent to email / تم تسجيل المستخدم بنجاح وتم إرسال رمز التحقق إلى البريد",StatusCodes.CREATED)
 })
 
-export const adminSignUp = asyncWrapper(async (req,res,next)=>{
-    const { email,password,role } = req.body;
-        
-        // Check for required fields
-        if (!email || !password ||!role) {
-            return AppErrors.badRequest(res, {
-                message: "Missing required fields / احد الحقول مطلوب",
-                details: {
-                    email: !email ? "Email is required / البريد الالكترونى مطلوب" : null,
-                    password: !password ? "Password is required / الرقم السرى مطلوب" : null,
-                    role: !role ? "Role is Required / المسؤليه مطلوبه" : null
-                }
-            });
-        }
+export const verifyOtp = asyncWrapper(async (req, res, next) => {
+  const { email, otp } = req.body;
 
-        // Check if admin already exists
-        const existingAdmin = await userRepo.findByEmail(email.toLowerCase() );
-        
-        if (existingAdmin) {
-            return AppErrors.conflict(res, {
-                message: "Registration failed / فشل التسجيل",
-                error: "An admin with this email already exists / المسؤل صاحب هذا البريد مسجل بالفعل"
-            });
-        }
+  if (!email || !otp) {
+    throw AppErrors.badRequest("Email and OTP are required / البريد الإلكتروني والرمز مطلوبان");
+  }
 
-        // Create new admin
-        const newAdmin = await userRepo.create(req.body);
+  const user = await userRepo.findByEmail(email.toLowerCase());
 
-        return appResponses.success(res, newAdmin, "Admin registered successfully / تم تسجيل المسؤل بنجاح", StatusCodes.CREATED);
+  if (!user) {
+    throw AppErrors.notFound("User not found / المستخدم غير موجود");
+  }
+
+  if (user.isVerify) {
+    return appResponses.success(res, null, "User already verified / المستخدم مُفعل مسبقاً");
+  }
+
+  if (user.otp.toString() !== otp) {
+    throw AppErrors.badRequest("Invalid OTP / الرمز غير صحيح");
+  }
+
+  if (user.otpExpiry < Date.now()) {
+    throw AppErrors.badRequest("OTP expired / انتهت صلاحية الرمز");
+  }
+
+  // Mark user as verified
+  await userRepo.update(user._id,{isVerify:true,otp:null,otpExpiry:null});
+
+  return appResponses.success(res, null, "User verified successfully / تم تفعيل المستخدم بنجاح");
+});
+
+export const resendOtp = asyncWrapper(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    throw AppErrors.badRequest("Email is required / البريد الإلكتروني مطلوب");
+  }
+
+  const user = await userRepo.findByEmail(email.toLowerCase());
+
+  if (!user) {
+    throw AppErrors.notFound("User not found / المستخدم غير موجود");
+  }
+
+  if (user.isVerify) {
+    return appResponses.success(res, null, "User already verified / المستخدم مُفعل مسبقاً");
+  }
+
+  // Generate new OTP
+  const otp = generateOTP();
+  const otpExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+  // Update user
+  await userRepo.update(user._id,{otp,otpExpiry})
+
+  // Send OTP email
+  await mailVerification(email, otp);
+
+  return appResponses.success(res, null, "New OTP sent successfully / تم إرسال رمز التحقق الجديد بنجاح");
+});
+
+export const  requestResetPassword  = asyncWrapper(async (req,res,next)=>{
+    const { email } = req.body;
+
+    if (!email) throw AppErrors.badRequest("Email is required / البريد الإلكتروني مطلوب");
+
+    const user = await userRepo.findByEmail(email.toLowerCase());
+    if (!user) throw AppErrors.notFound("User not found / المستخدم غير موجود");
+
+    // Generate secure token
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const expiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+    await userRepo.update(user._id,{resetPasswordToken:resetToken,resetPasswordExpiry:expiry})
+
+    // Send token via email
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
+    // Send email
+    await sendResetPasswordEmail(email, resetLink);
+
+    return appResponses.success(res, null, "Reset password email sent");
 })
+
+export const resetPassword = asyncWrapper(async (req, res, next) => {
+  const { email, token, newPassword, confirmPassword } = req.body;
+
+  if (!email || !token || !newPassword || !confirmPassword)
+    throw AppErrors.badRequest("All fields are required / كل الحقول مطلوبه");
+
+  if (newPassword !== confirmPassword)
+    throw AppErrors.badRequest("Passwords do not match / الرقم السرى غير مطابق");
+
+  const user = await userRepo.findByEmail(email.toLowerCase());
+  if (!user) throw AppErrors.notFound("User not found / المستخدم غير موجود");
+
+  // Validate token
+  if (
+    user.resetPasswordToken !== token ||
+    user.resetPasswordExpiry < Date.now()
+  ) {
+    throw AppErrors.badRequest("Invalid or expired token / الرمز غير صالح أو منتهي الصلاحية");
+  }
+
+  // Hash new password
+    const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  await userRepo.update(user._id,{password:hashedPassword,resetPasswordToken:null,resetPasswordExpiry:null});
+
+  return appResponses.success(res, null, "Password reset successfully / تم إعادة تعيين كلمة المرور بنجاح");
+});
 
 export const signOut =asyncWrapper(async (req,res,next)=>{
     res.clearCookie("access_token", {

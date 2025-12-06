@@ -199,7 +199,7 @@ export const mailVerification = async (email,otp) =>{
         },
         });
         const mailOptions =  {
-            from: `"Your Store" <${process.env.MAIL_USER}>`,
+            from: `"Koora Store" <${process.env.MAIL_USER}>`,
             to: email,
             subject: `✅ OTP Verification Code `,
             html: `
@@ -234,7 +234,7 @@ export const mailVerification = async (email,otp) =>{
 
                     <p style="margin-top:25px; font-size:14px; color:#333;">
                     Best Regards,<br/>
-                    <strong>Sporting Clothes App Team</strong>
+                    <strong>Koora App Team</strong>
                     </p>
                 </div>
             `
@@ -242,7 +242,45 @@ export const mailVerification = async (email,otp) =>{
         const info = await transport.sendMail(mailOptions);
         console.log("Professional orange-themed email sent successfully:", info.messageId);
     } catch (error) {
-        
+        console.log("Mail Virification Fail , Error:",error);
+    }
+}
+
+export const sendResetPasswordEmail  = async (email,link) =>{
+    try {
+        //  Gmail
+        const transport = nodemailer.createTransport({
+        host: process.env.MAIL_USER || "smtp.gmail.com",
+        service: "Gmail",
+        port: 465,
+        secure: true, // true 
+        auth: {
+            user: process.env.MAIL_USER, //  Gmail   
+            pass: process.env.MAIL_PASS, // App Password
+        },
+        });
+        const mailOptions = {
+          from: process.env.MAIL_USER,
+          to: email,
+          subject: "🔑 Reset Your Password",
+          html: `
+            <div style="padding:20px; font-family:Arial;">
+              <h2>Reset Password</h2>
+              <p>Click the link below to reset your password:</p>
+
+              <a href="${link}"
+                style="display:inline-block; background:#1a73e8; color:white; padding:12px 18px; text-decoration:none; border-radius:6px;">
+                Reset Password
+              </a>
+
+              <p style="margin-top:20px; color:#555">This link expires in 15 minutes.</p>
+            </div>
+          `,
+        };
+        const info = await transport.sendMail(mailOptions);
+        console.log("Professional orange-themed email sent successfully:", info.messageId);
+    } catch (error) {
+        console.log("Mail Reset Password Fail , Error:",error);
     }
 }
 

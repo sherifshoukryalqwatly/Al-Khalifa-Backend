@@ -25,7 +25,7 @@ export const findAll = async (filters,sort,pagination)=>{
 }
 //Update
 export const update = async (id,newData)=>{
-    return await User.findByIdAndUpdate(id,newData,{runValidators:true,new:true});
+    return await User.findByIdAndUpdate(id,newData,{new:true});
 }
 //Delete hard
 export const hRemove = async (id)=>{
