@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-import { googleCallback, signIn, signOut, signUp, adminSignUp } from "../auth/auth.controller.js";
+import { googleCallback, signIn, signOut, signUp, adminSignUp, facebookCallback } from "../auth/auth.controller.js";
 import validationMiddleware, { createUserSchema } from "../validations/Users/user.validation.js";
 
 const router = express.Router();
@@ -27,5 +27,27 @@ router.get(
   }),
   googleCallback
 );
+
+// passport Facebook
+router.get(
+  "/facebook/login",
+  passport.authenticate("facebook", { scope: ["email", "public_profile"] })
+);
+
+router.get(
+  "/facebook/callback",
+  (req, res, next) => {
+    console.log("Callback request received:", req.query);
+    console.log("FACEBOOK CALLBACK (from env):", process.env.FACEBOOK_CALLBACK_URL_DEV);
+    passport.authenticate("facebook", {
+      session: false,
+      failureMessage : "Failed To Login With Facebook",
+      failureRedirect: `${process.env.CLIENT_URL}/login`,
+      successRedirect : `${process.env.CLIENT_URL}/sucess`,
+    })(req, res, next);
+  },
+  facebookCallback
+);
+
 
 export default router;

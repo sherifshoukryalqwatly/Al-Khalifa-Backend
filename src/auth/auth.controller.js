@@ -147,3 +147,33 @@ export const googleCallback = async (req, res, next) => {
     );
   }
 };
+
+export const facebookCallback = async (req,res,next)=>{
+    console.log("facebookCallback triggered, req.user:", req.user);
+    try {
+        if (!req.user) {
+            console.error("No user provided by Passport");
+            return res.redirect(`${process.env.CLIENT_URL}/login?error=no_user`);
+        }
+        const user = req.user;
+        const token = generateToken({ id: user._id, role: user.role }, { expiresIn: '1d' });
+        const { password: _, ...safeUser } = user.toObject();
+
+        console.log("Setting cookie and redirecting for user:", safeUser);
+        res
+        .cookie("access_token", token, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        })
+        .redirect(`${process.env.CLIENT_URL}`);
+    } catch (error) {
+        console.error("facebook callback error:", err.message);
+        res.redirect(
+        `${process.env.CLIENT_URL}/login?error=${encodeURIComponent(
+            err.message
+        )}`
+        );
+    }
+}

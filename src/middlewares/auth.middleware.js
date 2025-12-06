@@ -46,7 +46,7 @@ export const isAuthenticated = asyncWrapper(async (req,res,next)=>{
 
 export const authorizeRole = (...role)=>{
     return (req,res,next)=>{
-        if(!req.role || !role.includes(req.user.role)){
+        if(!req.user || !role.includes(req.user.role)){
             return appResponses.forbidden(res,'Not Have Permissions / لا تمتلك الحقوق ')
         }
         next ()
