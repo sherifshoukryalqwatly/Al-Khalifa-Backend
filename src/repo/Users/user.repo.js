@@ -33,7 +33,7 @@ export const hRemove = async (id)=>{
 }
 //Delete Soft
 export const remove = async (id)=>{
-    return User.findByIdAndUpdate(id,{isDeleted:true},{runValidators:true,new:true});
+    return User.findByIdAndUpdate(id,{isDeleted:true},{new:true});
 }
 //Delete All Hard
 export const hRemoveAll = async (ids)=>{

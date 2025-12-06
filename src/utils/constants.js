@@ -8,7 +8,7 @@ export const globalRegex = {
   // standard email format ex : user@example.com
   emailRegex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ ,
   // URL to an image file (jpg, jpeg, png) ex : https://res.cloudinary.com/demo/image/upload/sample.jpg
-  profileImageRegex: /^https?:\/\/.+\.(jpg|jpeg|png)$/i,
+  profileImageRegex: /^https?:\/\/.+\.(jpg|jpeg|png|webp)$/i,
   // Date in YYYY-MM-DD format ex : 2023-10-15
   dateRegex: /^\d{4}-\d{2}-\d{2}$/
 }

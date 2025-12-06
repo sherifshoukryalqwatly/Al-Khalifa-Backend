@@ -11,7 +11,8 @@ import {
   requestResetPassword,
   resetPassword
   } from "../auth/auth.controller.js";
-import validationMiddleware, { createUserSchema } from "../validations/Users/user.validation.js";
+import validationMiddleware from "../middlewares/validation.middleware.js";
+import { createUserSchema } from "../validations/Users/user.validation.js";
 
 const router = express.Router();
 

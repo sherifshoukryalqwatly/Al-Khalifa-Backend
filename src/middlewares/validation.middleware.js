@@ -1,18 +1,29 @@
+import AppErrors from '../utils/AppErrors.js';
 
-import AppErrors from "../utils/ApiError.js";
-import { StatusCodes } from "../utils/constants.js";
+const validationMiddleware = (schema) => {
+  return (req, res, next) => {
+    const { body, params, query } = req;
 
-const validate = (schema) => {
-    return (req, res, next) => {
-        const { error } = schema.validate(req.body, { abortEarly: false });
-
-        if (error) {
-        const errorDetails = error.details.map(d => d.message);
-        throw AppErrors.createError(errorDetails, StatusCodes.BAD_REQUEST, "Validation Error");
-      }
-
-      next();
+    const dataToValidate = {
+      ...(Object.keys(body).length ? { body } : {}),
+      ...(Object.keys(params).length ? { params } : {}),
+      ...(Object.keys(query).length ? { query } : {}),
     };
+
+    const { error } = schema.validate(dataToValidate.body || body, {
+      abortEarly: false, // return all errors
+      allowUnknown: false, // disallow unknown fields
+      stripUnknown: true, // remove unknown fields
+    });
+
+    if (error) {
+      // Combine all messages
+      const messages = error.details.map((detail) => detail.message).join(', ');
+      return next(AppErrors.badRequest(messages));
+    }
+
+    next();
+  };
 };
 
-export { validate };
+export default validationMiddleware;

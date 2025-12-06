@@ -1,6 +1,7 @@
 import express from "express";
 import * as userController from '../../controllers/Users/user.controller.js';
-import validationMiddleware,{ createUserSchema , updateUserSchema } from '../../validations/Users/user.validation.js'
+import validationMiddleware from "../../middlewares/validation.middleware.js";
+import { createUserSchema , updateUserSchema } from '../../validations/Users/user.validation.js'
 import { authorizeRole, isAuthenticated } from "../../middlewares/auth.middleware.js";
 const router = express.Router();
 
