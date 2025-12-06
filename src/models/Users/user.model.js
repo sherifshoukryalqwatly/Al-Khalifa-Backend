@@ -40,14 +40,9 @@ const userData = {
     unique: [true, "Google ID must be unique / يجب أن يكون معرف جوجل فريدًا"],
     sparse: true,
   },
-  twitterid: {
-    type: String,
-    unique: [true, "Twitter ID must be unique / يجب أن يكون معرف تويتر فريدًا"],
-    sparse: true,
-  },
   loginMethods: {
     type: [String],
-    enum: ["local", "google", "facebook", "twitter"],
+    enum: ["local", "google", "facebook"],
     default: ["local"],
   },
   name: {
@@ -76,8 +71,7 @@ const userData = {
       function () {
         return (
           !this.googleid &&
-          !this.faceBookid &&
-          !this.twitterid
+          !this.faceBookid 
         );
       },
       "Password is required / الرقم السري مطلوب",
@@ -107,8 +101,7 @@ const userData = {
       function () {
         return (
           !this.googleid &&
-          !this.faceBookid &&
-          !this.twitterid
+          !this.faceBookid 
         );
       },
       "Phone number is required / رقم الهاتف مطلوب",
@@ -168,7 +161,6 @@ const userSchema = new mongoose.Schema(userData, {
             delete ret.password;
             delete ret.googleid;
             delete ret.faceBookid;
-            delete ret.twitterid;
 
             return ret;
         },

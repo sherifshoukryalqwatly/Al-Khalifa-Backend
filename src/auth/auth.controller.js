@@ -1,4 +1,4 @@
-import asyncWrapper from '../utils/asyncHandler.js'
+import asyncWrapper from '../utils/asyncHandler.js';
 import AppErrors from '../utils/AppErrors.js';
 import bcrypt from 'bcryptjs';
 import {generateToken} from '../utils/jwt.js';

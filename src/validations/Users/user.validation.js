@@ -103,14 +103,12 @@ export const baseValidationRules = {
 
   googleId: Joi.string().allow(null, ''),
 
-  twitterid: Joi.string().allow(null, ''),
-
   loginMethods: Joi.array()
-    .items(Joi.string().valid('local', 'google', 'facebook', 'twitter'))
+    .items(Joi.string().valid('local', 'google', 'facebook'))
     .default(['local'])
     .messages({
       'array.includes':
-        'Login method must be one of: local, google, facebook, twitter',
+        'Login method must be one of: local, google, facebook',
     }),
 };
 
@@ -126,7 +124,6 @@ export const createUserSchema = Joi.object({
   isVerify: baseValidationRules.isVerify.default(false),
   faceBookid: baseValidationRules.faceBookid,
   googleId: baseValidationRules.googleId,
-  twitterid: baseValidationRules.twitterid,
   loginMethods: baseValidationRules.loginMethods
 }).options({
   stripUnknown: true,
@@ -147,7 +144,6 @@ export const updateUserSchema = Joi.object({
     isVerify: baseValidationRules.isVerify.optional(),
     faceBookid: baseValidationRules.faceBookid.optional(),
     googleId: baseValidationRules.googleId.optional(),
-    twitterid: baseValidationRules.twitterid.optional(),
     loginMethods: baseValidationRules.loginMethods.optional()
 })
 .min(1) // ensure at least one field is updated
@@ -166,7 +162,6 @@ export const socialLoginSchema = Joi.object({
     email: baseValidationRules.email.required(),
     faceBookid: baseValidationRules.faceBookid.optional(),
     googleId: baseValidationRules.googleId.optional(),
-    twitterid: baseValidationRules.twitterid.optional(),
     loginMethods: baseValidationRules.loginMethods.required()
 }).options({
     stripUnknown: true,

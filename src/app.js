@@ -1,11 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import passport from 'passport';
 
 import routes from './routes/index.js';
 import { requestLogger } from "./middlewares/logger.middleware.js";
 import { swaggerSetup } from "./config/swagger.config.js";
-import passportConfig from "./config/passport.config.js";
 import AppErrors from './utils/AppErrors.js';
 
 const app = express();
