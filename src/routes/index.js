@@ -6,6 +6,7 @@ import userRoutes from "./Users/user.route.js";
 import uploadRoutes from "./System/upload.route.js";
 import productRoute from "./Products/product.route.js";
 import categoryRoute from "./Products/category.route.js";
+import reviewRoute from "./Products/review.route.js";
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.use("/users", userRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/products", productRoute);
 router.use("/categories", categoryRoute);
+router.use("/reviews", reviewRoute);
 
 // Default route for API health check
 router.get("/", (req, res) => {
