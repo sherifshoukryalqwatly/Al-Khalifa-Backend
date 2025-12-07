@@ -49,14 +49,14 @@ const CategorySchema = new mongoose.Schema(
 );
 
 // Auto-generate slug based on name
-CategorySchema.pre("save", function (next) {
+CategorySchema.pre("save", async function () {
   if (this.name?.en) {
     this.slug.en = this.name.en.toLowerCase().replace(/ /g, "-");
   }
   if (this.name?.ar) {
     this.slug.ar = this.name.ar.replace(/ /g, "-");
   }
-  next();
 });
 
-export default mongoose.model("Category", CategorySchema);
+const Category =  mongoose.model("Category", CategorySchema);
+export default Category;

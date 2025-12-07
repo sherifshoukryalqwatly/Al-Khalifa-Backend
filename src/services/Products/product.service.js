@@ -1,5 +1,5 @@
 import * as productRepo from "../../repo/Products/product.repo.js";
-import AppErrors from "../../utils/AppErrors.js";
+import AppErrors from "../../utils/AppErrors.js"
 import { productFilters, productSort, productPagination } from "../../utils/product_filter_sort.js";
 
 /* -------------------------------------------------------
