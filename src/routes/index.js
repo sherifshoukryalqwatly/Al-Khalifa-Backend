@@ -12,6 +12,7 @@ import cartRoute from "./Sales/cart.route.js";
 import couponRoute from "./Sales/coupon.route.js";
 import orderRoute from "./Sales/order.route.js";
 import paymentRoute from "./Sales/payment.route.js";
+import refundRoute from "./Sales/refund.route.js";
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.use("/cart", cartRoute);
 router.use("/coupon", couponRoute);
 router.use("/order", orderRoute);
 router.use("/payment", paymentRoute);
+router.use("/refund", refundRoute);
 
 // Default route for API health check
 router.get("/", (req, res) => {

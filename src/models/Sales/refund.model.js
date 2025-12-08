@@ -47,4 +47,5 @@ const RefundSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Refund", RefundSchema);
+const Refund = mongoose.model("Refund", RefundSchema);
+export default Refund;
