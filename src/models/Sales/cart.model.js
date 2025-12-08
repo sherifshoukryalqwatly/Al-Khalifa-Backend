@@ -66,5 +66,10 @@ const CartSchema = new mongoose.Schema(
 CartSchema.virtual('totalPrice').get(function () {
   return this.items.reduce((sum, item) => sum + item.totalItemPrice, 0);
 });
+// ⭐ Virtual total price
+CartSchema.virtual('itemCount').get(function () {
+  return this.items.reduce((sum, item) => sum + item.quantity, 0);
+});
 
-export default mongoose.model("Cart", CartSchema);
+const Cart =  mongoose.model("Cart", CartSchema);
+export default Cart;
