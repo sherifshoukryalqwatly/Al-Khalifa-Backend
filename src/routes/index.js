@@ -10,6 +10,7 @@ import reviewRoute from "./Products/review.route.js";
 import wishlistRoute from "./Products/wishlist.route.js";
 import cartRoute from "./Sales/cart.route.js";
 import couponRoute from "./Sales/coupon.route.js";
+import orderRoute from "./Sales/order.route.js";
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use("/reviews", reviewRoute);
 router.use("/wishlist", wishlistRoute);
 router.use("/cart", cartRoute);
 router.use("/coupon", couponRoute);
+router.use("/order", orderRoute);
 
 // Default route for API health check
 router.get("/", (req, res) => {

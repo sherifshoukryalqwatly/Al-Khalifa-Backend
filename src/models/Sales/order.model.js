@@ -153,4 +153,5 @@ OrderSchema.virtual('totalQuantity').get(function () {
   return this.items.reduce((sum, item) => sum + item.quantity, 0);
 });
 
-export default mongoose.model("Order", OrderSchema);
+const Order =  mongoose.model("Order", OrderSchema);
+export default Order;
