@@ -13,6 +13,7 @@ import orderRoute from "./Sales/order.route.js";
 import paymentRoute from "./Sales/payment.route.js";
 import refundRoute from "./Sales/refund.route.js";
 import auditlogRoute from "./System/auditlog.route.js";
+import bannerRoute from "./System/banner.route.js";
 
 const router = express.Router();
 
@@ -29,6 +30,7 @@ router.use("/order", orderRoute);
 router.use("/payment", paymentRoute);
 router.use("/refund", refundRoute);
 router.use("/auditlog", auditlogRoute);
+router.use("/banner", bannerRoute);
 
 // Default route for API health check
 router.get("/", (req, res) => {
