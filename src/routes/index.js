@@ -16,6 +16,7 @@ import auditlogRoute from "./System/auditlog.route.js";
 import bannerRoute from "./System/banner.route.js";
 import notificationRoute from "./System/notification.route.js";
 import shippingRoute from "./Sales/shipping.route.js";
+import inventoryRoute from "./Sales/inventory.route.js";
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.use("/auditlog", auditlogRoute);
 router.use("/banner", bannerRoute);
 router.use("/notifications", notificationRoute);
 router.use("/shipping", shippingRoute);
+router.use("/inventory", inventoryRoute);
 
 // Default route for API health check
 router.get("/", (req, res) => {
