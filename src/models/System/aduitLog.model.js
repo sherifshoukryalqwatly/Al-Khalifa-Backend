@@ -43,4 +43,5 @@ const AuditLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("AuditLog", AuditLogSchema);
+const AuditLog =  mongoose.model("AuditLog", AuditLogSchema);
+export default AuditLog;
