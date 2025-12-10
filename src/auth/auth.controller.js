@@ -277,21 +277,12 @@ export const resetPassword = asyncWrapper(async (req, res, next) => {
   return appResponses.success(res, null, "Password reset successfully / تم إعادة تعيين كلمة المرور بنجاح");
 });
 
-export const signOut =asyncWrapper(async (req,res,next)=>{
+export const signOut =asyncWrapper(async (req,res,next)=>{  
+
     res.clearCookie("access_token", {
         httpOnly: true,
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
-    });
-
-    // Audit log
-    await logAction({
-      req,
-      user: req.user,
-      action: 'LOGOUT',
-      targetModel: 'User',
-      targetId: req.user._id,
-      description: `User ${req.user.email} signed out`
     });
     
     return appResponses.success(res, {}, "Successfully logged out / تسجيل الخروج تم بنجاح");

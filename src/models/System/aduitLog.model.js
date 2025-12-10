@@ -13,7 +13,7 @@ const AuditLogSchema = new mongoose.Schema(
       required: [true, 'Action is Required / الإجراء مطلوب'],
       enum: [
         'CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 
-        'PAYMENT', 'ORDER', 'REFUND', 'COUPON', 'CART', 'WISHLIST'
+        'PAYMENT', 'ORDER', 'REFUND', 'COUPON', 'CART', 'WISHLIST','READ'
       ],
       message: 'Invalid action type / نوع الإجراء غير صالح'
     },
