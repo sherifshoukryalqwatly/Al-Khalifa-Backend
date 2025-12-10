@@ -3,12 +3,25 @@ import asyncWrapper from '../../utils/asyncHandler.js';
 import { appResponses } from '../../utils/AppResponses.js';
 import { uploadToCloudinary } from '../../utils/uploadToCloudinary.js';
 import AppErrors from '../../utils/AppErrors.js';
+import { auditLogService } from '../../services/System/auditlog.service.js';
+
+// Helper for audit logs
+const logAction = async ({ req, user, action, targetModel, targetId, description }) => {
+  await auditLogService.createLog({
+    user: user?._id || user?.id || null,
+    action,
+    targetModel,
+    targetId,
+    description,
+    ipAddress: req?.ip || null,
+    userAgent: req?.headers?.['user-agent'] || null
+  });
+};
 
 // -------------------- CREATE PRODUCT --------------------
 export const create = asyncWrapper(async (req, res) => {
   const uploadedImages = [];
 
-  // Upload files to Cloudinary if provided
   if (req.files && req.files.length > 0) {
     for (let file of req.files) {
       const image = await uploadToCloudinary(file, "products");
@@ -16,9 +29,8 @@ export const create = asyncWrapper(async (req, res) => {
     }
   }
 
-  // Add uploaded images to product data
   const productData = {
-      title: {
+    title: {
       en: req.body['title.en'],
       ar: req.body['title.ar']
     },
@@ -28,11 +40,18 @@ export const create = asyncWrapper(async (req, res) => {
     },
     ...req.body,
     images: uploadedImages
-  }
-
-  
+  };
 
   const product = await productService.create(productData);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'CREATE',
+    targetModel: 'Product',
+    targetId: product._id,
+    description: `Created product with title: ${product.title.en}`
+  });
 
   return appResponses.success(
     res,
@@ -47,7 +66,6 @@ export const update = asyncWrapper(async (req, res) => {
   const { id } = req.params;
   const updatedData = { ...req.body };
 
-  // Upload new files if provided and append to existing images
   if (req.files && req.files.length > 0) {
     const uploadedImages = [];
     for (let file of req.files) {
@@ -55,12 +73,20 @@ export const update = asyncWrapper(async (req, res) => {
       uploadedImages.push(image.secure_url);
     }
 
-    // Merge with existing images if you want to keep old ones
     const product = await productService.findById(id);
     updatedData.images = [...(product.images || []), ...uploadedImages];
   }
 
   const updatedProduct = await productService.update(id, updatedData);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'UPDATE',
+    targetModel: 'Product',
+    targetId: updatedProduct._id,
+    description: `Updated product with title: ${updatedProduct.title.en}`
+  });
 
   return appResponses.success(
     res,
@@ -73,6 +99,16 @@ export const update = asyncWrapper(async (req, res) => {
 export const findById = asyncWrapper(async (req, res) => {
   const { id } = req.params;
   const product = await productService.findById(id);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'READ',
+    targetModel: 'Product',
+    targetId: product._id,
+    description: `Fetched product with title: ${product.title.en}`
+  });
+
   return appResponses.success(
     res,
     product,
@@ -82,12 +118,21 @@ export const findById = asyncWrapper(async (req, res) => {
 
 // -------------------- FIND PRODUCT BY TITLE --------------------
 export const findByTitle = asyncWrapper(async (req, res) => {
-  const { title } = req.query; // send as ?title=...
+  const { title } = req.query;
   if (!title) {
     throw AppErrors.badRequest("Product title is required / عنوان المنتج مطلوب");
   }
 
   const product = await productService.findByTitle(title);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'READ',
+    targetModel: 'Product',
+    targetId: product._id,
+    description: `Fetched product by title: ${product.title.en}`
+  });
 
   return appResponses.success(
     res,
@@ -104,6 +149,15 @@ export const findAll = asyncWrapper(async (req, res) => {
     query.sort,
     query.pagination
   );
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'READ',
+    targetModel: 'Product',
+    description: `Fetched all products (count: ${products.length})`
+  });
+
   return appResponses.success(
     res,
     { data: products, total },
@@ -115,6 +169,16 @@ export const findAll = asyncWrapper(async (req, res) => {
 export const hRemove = asyncWrapper(async (req, res) => {
   const { id } = req.params;
   await productService.hRemove(id);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'DELETE',
+    targetModel: 'Product',
+    targetId: id,
+    description: `Hard deleted product with id: ${id}`
+  });
+
   return appResponses.success(
     res,
     null,
@@ -126,6 +190,16 @@ export const hRemove = asyncWrapper(async (req, res) => {
 export const remove = asyncWrapper(async (req, res) => {
   const { id } = req.params;
   await productService.remove(id);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'DELETE',
+    targetModel: 'Product',
+    targetId: id,
+    description: `Soft deleted product with id: ${id}`
+  });
+
   return appResponses.success(
     res,
     null,
@@ -137,6 +211,15 @@ export const remove = asyncWrapper(async (req, res) => {
 export const hRemoveAll = asyncWrapper(async (req, res) => {
   const { ids } = req.body;
   await productService.hRemoveAll(ids);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'DELETE',
+    targetModel: 'Product',
+    description: `Hard deleted multiple products (count: ${ids.length})`
+  });
+
   return appResponses.success(
     res,
     null,
@@ -148,6 +231,15 @@ export const hRemoveAll = asyncWrapper(async (req, res) => {
 export const removeAll = asyncWrapper(async (req, res) => {
   const { ids } = req.body;
   await productService.removeAll(ids);
+
+  await logAction({
+    req,
+    user: req.user,
+    action: 'DELETE',
+    targetModel: 'Product',
+    description: `Soft deleted multiple products (count: ${ids.length})`
+  });
+
   return appResponses.success(
     res,
     null,

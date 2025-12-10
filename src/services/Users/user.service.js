@@ -122,6 +122,6 @@ export const getMe = async (id)=>{
     const user = await userRepo.getMe(id);
     if(!user) throw  AppErrors.notFound('User not Found / المستخدم غير موجود');
 
-    return user;
+    return await userRepo.getMe(id);
 }
 

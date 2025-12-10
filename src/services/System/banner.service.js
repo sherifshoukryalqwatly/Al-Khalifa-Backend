@@ -6,22 +6,11 @@
 
 import AppErrors from "../../utils/AppErrors.js";
 import { bannerRepo } from "../../repo/System/banner.repo.js";
-import { auditLogService } from "../../services/System/auditlog.service.js";
 
 export const bannerService = {
   /* ----------------------------- Create Banner ----------------------------- */
   async create(data, user) {
     const banner = await bannerRepo.create(data);
-
-    await auditLogService.createLog({
-      user: user._id,
-      action: "CREATE",
-      targetModel: "Banner",
-      targetId: banner._id,
-      newData: banner,
-      description: `Created banner (${banner.title.en})`
-    });
-
     return banner;
   },
 
@@ -41,19 +30,7 @@ export const bannerService = {
   async update(id, data, user) {
     const oldData = await bannerRepo.getBeforeUpdate(id);
     if (!oldData) throw AppErrors.notFound("Banner not found / البانر غير موجود");
-
     const updatedBanner = await bannerRepo.update(id, data);
-
-    await auditLogService.createLog({
-      user: user._id,
-      action: "UPDATE",
-      targetModel: "Banner",
-      targetId: updatedBanner._id,
-      oldData,
-      newData: updatedBanner,
-      description: `Updated banner (${oldData.title?.en})`
-    });
-
     return updatedBanner;
   },
 
@@ -61,18 +38,7 @@ export const bannerService = {
   async delete(id, user) {
     const oldData = await bannerRepo.getBeforeUpdate(id);
     if (!oldData) throw AppErrors.notFound("Banner not found / البانر غير موجود");
-
     const deletedBanner = await bannerRepo.softDelete(id);
-
-    await auditLogService.createLog({
-      user: user._id,
-      action: "DELETE",
-      targetModel: "Banner",
-      targetId: deletedBanner._id,
-      oldData,
-      description: `Deleted banner (${oldData.title?.en})`
-    });
-
     return deletedBanner;
   }
 };

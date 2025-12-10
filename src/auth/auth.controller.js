@@ -8,6 +8,7 @@ import * as userRepo from '../repo/Users/user.repo.js';
 import { mailVerification , mailVerification2, sendResetPasswordEmail } from '../utils/email.js';
 import { generateOTP } from '../utils/generateOTP.js';
 import crypto from 'crypto'
+import { auditLogService } from '../services/System/auditlog.service.js';
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -19,6 +20,19 @@ const setAuthCookie = (res,token)=>{
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     })
 }
+
+// Helper for audit logs
+const logAction = async ({ req, user, action, targetModel, targetId, description }) => {
+  await auditLogService.createLog({
+    user: user?._id || user?.id || null,
+    action,
+    targetModel,
+    targetId,
+    description,
+    ipAddress: req?.ip || null,
+    userAgent: req?.headers?.['user-agent'] || null
+  });
+};
 
 export const signIn = asyncWrapper(async (req,res,next)=>{
     const {email,password} = req.body;
@@ -46,6 +60,16 @@ export const signIn = asyncWrapper(async (req,res,next)=>{
     );
 
     const {password:_,...safeUser} = existUser.toObject();
+
+    // Audit log
+    await logAction({
+      req,
+      user: existUser,
+      action: 'LOGIN',
+      targetModel: 'User',
+      targetId: existUser._id,
+      description: `User ${existUser.email} signed in`
+    });
 
     return setAuthCookie(res,token)
             .status(StatusCodes.OK)
@@ -87,8 +111,17 @@ export const signUp =asyncWrapper(async (req,res,next)=>{
 
     await mailVerification(email,otp)
     // await mailVerification2(email,otp)
-    
 
+    // Audit log
+    await logAction({
+      req,
+      user: newUser,
+      action: 'CREATE',
+      targetModel: 'User',
+      targetId: newUser._id,
+      description: `New user registered with email ${newUser.email}`
+    });
+    
     return appResponses.success(res,newUser,"User Registered Successfully. OTP sent to email / تم تسجيل المستخدم بنجاح وتم إرسال رمز التحقق إلى البريد",StatusCodes.CREATED)
 })
 
@@ -120,6 +153,16 @@ export const verifyOtp = asyncWrapper(async (req, res, next) => {
   // Mark user as verified
   await userRepo.update(user._id,{isVerify:true,otp:null,otpExpiry:null});
 
+  // Audit log
+  await logAction({
+    req,
+    user,
+    action: 'UPDATE',
+    targetModel: 'User',
+    targetId: user._id,
+    description: `User ${email} verified OTP`
+  });
+
   return appResponses.success(res, null, "User verified successfully / تم تفعيل المستخدم بنجاح");
 });
 
@@ -150,6 +193,16 @@ export const resendOtp = asyncWrapper(async (req, res, next) => {
   // Send OTP email
   await mailVerification(email, otp);
 
+  // Audit log
+  await logAction({
+    req,
+    user,
+    action: 'UPDATE',
+    targetModel: 'User',
+    targetId: user._id,
+    description: `OTP resent to user ${email}`
+  });
+
   return appResponses.success(res, null, "New OTP sent successfully / تم إرسال رمز التحقق الجديد بنجاح");
 });
 
@@ -171,6 +224,16 @@ export const  requestResetPassword  = asyncWrapper(async (req,res,next)=>{
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
     // Send email
     await sendResetPasswordEmail(email, resetLink);
+
+    // Audit log
+    await logAction({
+      req,
+      user,
+      action: 'UPDATE',
+      targetModel: 'User',
+      targetId: user._id,
+      description: `Reset password requested for user ${email}`
+    });
 
     return appResponses.success(res, null, "Reset password email sent");
 })
@@ -201,6 +264,16 @@ export const resetPassword = asyncWrapper(async (req, res, next) => {
 
   await userRepo.update(user._id,{password:hashedPassword,resetPasswordToken:null,resetPasswordExpiry:null});
 
+  // Audit log
+  await logAction({
+    req,
+    user,
+    action: 'UPDATE',
+    targetModel: 'User',
+    targetId: user._id,
+    description: `Password reset for user ${email}`
+  });
+
   return appResponses.success(res, null, "Password reset successfully / تم إعادة تعيين كلمة المرور بنجاح");
 });
 
@@ -210,6 +283,17 @@ export const signOut =asyncWrapper(async (req,res,next)=>{
         secure: isProd,
         sameSite: isProd ? "none" : "lax",
     });
+
+    // Audit log
+    await logAction({
+      req,
+      user: req.user,
+      action: 'LOGOUT',
+      targetModel: 'User',
+      targetId: req.user._id,
+      description: `User ${req.user.email} signed out`
+    });
+    
     return appResponses.success(res, {}, "Successfully logged out / تسجيل الخروج تم بنجاح");
 })
 

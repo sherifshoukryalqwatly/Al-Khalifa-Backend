@@ -1,14 +1,21 @@
-/* --------------------------------------------------------------------------
- * 🎮 Banner Controller (HTTP Layer)
- * - Handles express req/res
- * - Uploads image to Cloudinary
- * - Delegates logic to service layer
- * -------------------------------------------------------------------------- */
-
 import asyncWrapper from "../../utils/asyncHandler.js";
 import { bannerService } from "../../services/System/banner.service.js";
 import { appResponses } from "../../utils/AppResponses.js";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary.js";
+import { auditLogService } from "../../services/System/auditlog.service.js";
+
+// Helper for audit logging
+const logAction = async ({ req, action, targetModel, targetId, description }) => {
+  await auditLogService.createLog({
+    user: req.user?.id || null,
+    action,
+    targetModel,
+    targetId,
+    description,
+    ipAddress: req.ip,
+    userAgent: req.headers['user-agent']
+  });
+};
 
 export const bannerController = {
   create: asyncWrapper(async (req, res) => {
@@ -34,21 +41,46 @@ export const bannerController = {
     };
 
     const banner = await bannerService.create(bannerData, req.user);
+
+    await logAction({
+      req,
+      action: "CREATE",
+      targetModel: "Banner",
+      targetId: banner._id,
+      description: `Created banner: ${banner.title.en || "No title"}`
+    });
+
     return appResponses.success(res, banner, "Banner created successfully / تم إنشاء البانر بنجاح");
   }),
 
   findAll: asyncWrapper(async (req, res) => {
     const banners = await bannerService.findAll();
+
+    await logAction({
+      req,
+      action: "READ",
+      targetModel: "Banner",
+      description: `Fetched all banners (count: ${banners.length})`
+    });
+
     return appResponses.success(res, banners, "Banners fetched successfully / تم جلب البانرات بنجاح");
   }),
 
   findById: asyncWrapper(async (req, res) => {
     const banner = await bannerService.findById(req.params.id);
+
+    await logAction({
+      req,
+      action: "READ",
+      targetModel: "Banner",
+      targetId: banner._id,
+      description: `Fetched banner by ID`
+    });
+
     return appResponses.success(res, banner, "Banner fetched successfully / تم جلب البانر بنجاح");
   }),
 
   update: asyncWrapper(async (req, res) => {
-    
     const updatedData = {
       ...req.body,
       title: req.body["title"] ? { en: req.body["title.en"], ar: req.body["title.ar"] } : undefined,
@@ -61,11 +93,29 @@ export const bannerController = {
     }
 
     const banner = await bannerService.update(req.params.id, updatedData, req.user);
+
+    await logAction({
+      req,
+      action: "UPDATE",
+      targetModel: "Banner",
+      targetId: banner._id,
+      description: `Updated banner: ${banner.title.en || "No title"}`
+    });
+
     return appResponses.success(res, banner, "Banner updated successfully / تم تحديث البانر بنجاح");
   }),
 
   delete: asyncWrapper(async (req, res) => {
     const banner = await bannerService.delete(req.params.id, req.user);
+
+    await logAction({
+      req,
+      action: "DELETE",
+      targetModel: "Banner",
+      targetId: banner._id,
+      description: `Deleted banner: ${banner.title.en || "No title"}`
+    });
+
     return appResponses.success(res, banner, "Banner deleted successfully / تم حذف البانر بنجاح");
   })
 };

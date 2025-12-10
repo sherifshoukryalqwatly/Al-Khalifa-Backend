@@ -5,6 +5,20 @@ import asyncWrapper from "../../utils/asyncHandler.js";
 import { cartService } from "../../services/Sales/cart.service.js";
 import { appResponses } from "../../utils/AppResponses.js"
 import { StatusCodes } from "../../utils/constants.js";
+import { auditLogService } from "../../services/System/auditlog.service.js";
+
+// Helper for audit logs
+const logAction = async ({ req, user, action, targetModel, targetId, description }) => {
+  await auditLogService.createLog({
+    user: user?._id || user?.id || null,
+    action,
+    targetModel,
+    targetId,
+    description,
+    ipAddress: req?.ip || null,
+    userAgent: req?.headers?.['user-agent'] || null
+  });
+};
 
 export const cartController = {
 
@@ -13,6 +27,15 @@ export const cartController = {
   -------------------------------- */
   getCart: asyncWrapper(async (req, res) => {
     const cart = await cartService.getCart(req.user._id);
+
+    await logAction({
+      req,
+      user: req.user,
+      action: 'READ',
+      targetModel: 'Cart',
+      targetId: req.user._id,
+      description: `Fetched cart for user ${req.user._id}`
+    });
 
     return appResponses.success(
       res,
@@ -27,6 +50,15 @@ export const cartController = {
   -------------------------------- */
   addItem: asyncWrapper(async (req, res) => {
     const cart = await cartService.addItem(req.user._id, req.body);
+
+    await logAction({
+      req,
+      user: req.user,
+      action: 'UPDATE',
+      targetModel: 'Cart',
+      targetId: req.user._id,
+      description: `Added item ${req.body.productId} to cart`
+    });
 
     return appResponses.success(
       res,
@@ -49,6 +81,15 @@ export const cartController = {
       variant
     );
 
+    await logAction({
+      req,
+      user: req.user,
+      action: 'UPDATE',
+      targetModel: 'Cart',
+      targetId: req.user._id,
+      description: `Removed item ${productId} from cart`
+    });
+
     return appResponses.success(
       res,
       cart,
@@ -62,6 +103,15 @@ export const cartController = {
   -------------------------------- */
   clear: asyncWrapper(async (req, res) => {
     await cartService.clearCart(req.user._id);
+
+    await logAction({
+      req,
+      user: req.user,
+      action: 'UPDATE',
+      targetModel: 'Cart',
+      targetId: req.user._id,
+      description: `Cleared cart for user ${req.user._id}`
+    });
 
     return appResponses.success(
       res,
