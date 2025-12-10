@@ -10,6 +10,9 @@ router.use(isAuthenticated);
 router.route('/by_email/:email')
     .get(authorizeRole('SUPER_ADMIN','ADMIN'), userController.findByEmail)
 
+router.route('/me')
+    .get(userController.getMe);
+
 router.route('/:id')
     .patch(validationMiddleware(updateUserSchema), userController.update)
     .delete(userController.remove)

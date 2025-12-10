@@ -113,3 +113,15 @@ export const removeAll = async (ids)=>{
     const result = await userRepo.removeAll(objIds);
     return {message: `${result.deletedCount} Users Deleted Successfully / تم حذف المستخدمين بنجاح`} 
 }
+
+//Get Me
+export const getMe = async (id)=>{
+    if(!id.match(/^[0-9a-fA-F]{24}$/)){
+        throw AppErrors.badRequest('Invalid User Id / Id خطأ')
+    }
+    const user = await userRepo.getMe(id);
+    if(!user) throw  AppErrors.notFound('User not Found / المستخدم غير موجود');
+
+    return user;
+}
+

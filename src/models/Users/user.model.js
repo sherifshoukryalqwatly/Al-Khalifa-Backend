@@ -23,12 +23,19 @@ const userData = {
     enum: ["local", "google", "facebook"],
     default: ["local"],
   },
-  name: {
+  firstName: {
     type: String,
     trim: true,
-    required: [true, 'Name is Required / الاسم مطلوب'],
-    minlength: [2, `Text must be at least two characters long / الاسم يجب على الاقل حرفين `],
-    maxlength: [100, `Text must not exceed 100 characters / الاسم يجب على الاكثر 100 حرف `],
+    required: [true, 'Fitst Name is Required / الاسم الاول مطلوب'],
+    minlength: [2, `Fitst Name must be at least two characters long / الاسم الاول يجب على الاقل حرفين `],
+    maxlength: [100, `Fitst Name must not exceed 100 characters / الاسم الاول يجب على الاكثر 100 حرف `],
+  },
+  lastName: {
+    type: String,
+    trim: true,
+    required: [true, 'Last Name is Required / الاسم الاخير مطلوب'],
+    minlength: [2, `Last Name must be at least two characters long / الاسم الاخير يجب على الاقل حرفين `],
+    maxlength: [100, `Last Name must not exceed 100 characters / الاسم الاخير يجب على الاكثر 100 حرف `],
   },
   email: {
     type:String,

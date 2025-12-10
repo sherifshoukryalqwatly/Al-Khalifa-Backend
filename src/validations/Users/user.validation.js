@@ -30,7 +30,12 @@ const localizedStringSchema = (min = 2, max = 500, required = true) => {
 
 // Main admin validation schema for CREATE
 export const baseValidationRules = {
-  name: Joi.string()
+  firstName: Joi.string()
+    .trim()
+    .min(3)
+    .max(100)
+    .required(),
+  lastName: Joi.string()
     .trim()
     .min(3)
     .max(100)
@@ -115,7 +120,8 @@ export const baseValidationRules = {
 
 //create
 export const createUserSchema = Joi.object({
-  name: baseValidationRules.name.required(),
+  firstName: baseValidationRules.firstName.required(),
+  lastName: baseValidationRules.lastName.required(),
   email: baseValidationRules.email.required(),
   password: baseValidationRules.password.required(),
   confirmPassword: baseValidationRules.confirmPassword.required(),
@@ -133,7 +139,8 @@ export const createUserSchema = Joi.object({
 
 //update
 export const updateUserSchema = Joi.object({
-    name: baseValidationRules.name.optional(),
+    firstName: baseValidationRules.firstName.optional(),
+    lastName: baseValidationRules.lastName.optional(),
     email: baseValidationRules.email.optional(),
     password: baseValidationRules.password.optional(),
     phonenumber: baseValidationRules.phonenumber.optional(),
@@ -158,7 +165,8 @@ export const updateUserSchema = Joi.object({
 
 // Social Login Validation Schema (for OAuth registration)
 export const socialLoginSchema = Joi.object({
-    name: baseValidationRules.name.optional(),
+    firstName: baseValidationRules.firstName.optional(),
+    lastName: baseValidationRules.lastName.optional(),
     email: baseValidationRules.email.required(),
     faceBookid: baseValidationRules.faceBookid.optional(),
     googleId: baseValidationRules.googleId.optional(),
@@ -207,7 +215,7 @@ export const getUsersQuerySchema = Joi.object({
     isDeleted: Joi.boolean().optional(),
     isVerify: Joi.boolean().optional(),
     search: Joi.string().max(100).optional(), // For searching by username, email, or name
-    sortBy: Joi.string().valid('createdAt', 'updatedAt', 'name', 'email').default('createdAt'),
+    sortBy: Joi.string().valid('createdAt', 'updatedAt', 'firstName', 'email').default('createdAt'),
     sortOrder: Joi.string().valid('asc', 'desc').default('desc')
 }).options({
     stripUnknown: true

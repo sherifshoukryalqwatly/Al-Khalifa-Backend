@@ -54,9 +54,9 @@ export const signIn = asyncWrapper(async (req,res,next)=>{
 
 export const signUp =asyncWrapper(async (req,res,next)=>{
 
-    const {name,email,password,confirmPassword,role} = req.body;
+    const {firstName,lastName,email,password,confirmPassword} = req.body;
 
-    if(!name||!email||!password||!confirmPassword||!role){
+    if(!firstName||!lastName||!email||!password||!confirmPassword){
 
         throw AppErrors.badRequest("Missing required fields / هنالك حقل مطلوب")
     }

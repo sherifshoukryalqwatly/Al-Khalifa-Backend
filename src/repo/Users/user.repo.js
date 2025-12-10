@@ -33,17 +33,22 @@ export const hRemove = async (id)=>{
 }
 //Delete Soft
 export const remove = async (id)=>{
-    return User.findByIdAndUpdate(id,{isDeleted:true},{new:true});
+    return await User.findByIdAndUpdate(id,{isDeleted:true},{new:true});
 }
 //Delete All Hard
 export const hRemoveAll = async (ids)=>{
-    return User.deleteMany({_id:{$in:ids}});
+    return await User.deleteMany({_id:{$in:ids}});
 }
 //Delete All Soft
 export const removeAll = async (ids)=> {
-    return User.updateMany(
+    return await User.updateMany(
         { _id: { $in: ids } }, // filter
         { $set: { isDeleted: true } }, // update
         { runValidators: true } // options
     );
+}
+
+//Get Me
+export const getMe = async (id)=> {
+    return await User.findById(id);
 }

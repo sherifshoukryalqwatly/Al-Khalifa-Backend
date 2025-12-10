@@ -64,3 +64,9 @@ export const removeAll = asyncWrapper(async (req,res)=>{
     await userService.removeAll(ids);
     return appResponses.success(res,null,'Users Deleted Successfully / تم حذف المستخدمين بنجاح');
 })
+
+//Get Me
+export const getMe = asyncWrapper(async(req,res)=>{
+    const user = await userService.getMe(req.user.id);
+    return appResponses.success(res,user,'User Retrieved Successfully / تم استرداد المستخدم بنجاح');
+})
