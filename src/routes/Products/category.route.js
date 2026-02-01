@@ -6,6 +6,8 @@ import { createCategorySchema, updateCategorySchema } from "../../validations/Pr
 
 const router = Router();
 
+router.use(isAuthenticated);
+
 /* -------------------------------------------------------
    PUBLIC ROUTES
 ---------------------------------------------------------*/
@@ -23,7 +25,6 @@ router.get("/:id", categoryController.findById);
    PROTECTED ROUTES (ADMIN ONLY)
 ---------------------------------------------------------*/
 
-router.use(isAuthenticated);
 router.use(authorizeRole("ADMIN", "SUPER_ADMIN"));
 
 /* CREATE CATEGORY */

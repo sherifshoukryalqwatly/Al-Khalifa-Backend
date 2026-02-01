@@ -73,7 +73,7 @@ export const signIn = asyncWrapper(async (req,res,next)=>{
 
     return setAuthCookie(res,token)
             .status(StatusCodes.OK)
-            .json({user:safeUser,token});
+            .json({data:safeUser,token});
 })
 
 export const signUp =asyncWrapper(async (req,res,next)=>{
@@ -109,7 +109,7 @@ export const signUp =asyncWrapper(async (req,res,next)=>{
         otpExpiry,
     });
 
-    await mailVerification(email,otp)
+    // await mailVerification(email,otp)
     // await mailVerification2(email,otp)
 
     // Audit log
@@ -275,6 +275,10 @@ export const resetPassword = asyncWrapper(async (req, res, next) => {
   });
 
   return appResponses.success(res, null, "Password reset successfully / تم إعادة تعيين كلمة المرور بنجاح");
+});
+
+export const me = asyncWrapper(async (req, res, next) => {
+  return appResponses.success(res, req.user, "Authenticated user");
 });
 
 export const signOut =asyncWrapper(async (req,res,next)=>{  

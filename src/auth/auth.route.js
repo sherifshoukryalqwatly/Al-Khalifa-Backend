@@ -9,14 +9,17 @@ import {
   verifyOtp,
   resendOtp,
   requestResetPassword,
-  resetPassword
+  resetPassword,
+  me
   } from "../auth/auth.controller.js";
 import validationMiddleware from "../middlewares/validation.middleware.js";
 import { createUserSchema } from "../validations/Users/user.validation.js";
+import { isAuthenticated } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 // User routes
+router.get("/me",isAuthenticated,me);
 router.post("/login", signIn);
 router.post("/register", validationMiddleware(createUserSchema), signUp);
 router.post("/logout", signOut);
@@ -24,6 +27,7 @@ router.post("/verify-otp", verifyOtp);
 router.post("/resend-otp", resendOtp);
 router.post("/request-reset-password", requestResetPassword);
 router.post("/reset-password", resetPassword);
+
 
 // Google OAuth routes
 router.get(

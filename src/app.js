@@ -10,7 +10,10 @@ import "./config/google_passport.config.js";
 const app = express();
 
 // Security Middlewares
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:4200',
+  credentials: true
+}));
 // ✅ Parse JSON bodies
 app.use(express.json());
 
